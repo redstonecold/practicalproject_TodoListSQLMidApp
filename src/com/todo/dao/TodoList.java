@@ -3,12 +3,16 @@ package com.todo.dao;
 import java.sql.Statement;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.todo.service.DbConnect;
 import com.todo.service.TodoSortByDate;
 import com.todo.service.TodoSortByName;
@@ -54,8 +58,8 @@ public class TodoList {
 	}
 
 	public int addItem(TodoItem t) {
-		String sql = "insert into list (title, memo, category, current_date, due_date)"
-				+ "values (?,?,?,?,?)";
+		String sql = "insert into list (title, memo, category, current_date, due_date, with_who, priority)"
+				+ " values (?,?,?,?,?,?,?);";
 		PreparedStatement pstmt;
 		int count = 0;
 		try {
@@ -65,6 +69,8 @@ public class TodoList {
 			pstmt.setString(3, t.getCategory());
 			pstmt.setString(4, t.getCurrent_date());
 			pstmt.setString(5, t.getDue_date());
+			pstmt.setString(6, t.getWith_who());
+			pstmt.setInt(7, t.getPriority());
 			count = pstmt.executeUpdate(); //해당 statement에 영향을 받은 record의 수가 return됨 
 			pstmt.close();
 		} catch (Exception e) {
@@ -89,7 +95,7 @@ public class TodoList {
 	}
 
 	public int updateItem(TodoItem t) {
-		String sql = "update list set title=?, memo=?, category=?, current_date=?, due_date=?"
+		String sql = "update list set title=?, memo=?, category=?, current_date=?, due_date=?, with_who=?, priority=?"
 				+ " where id=?;";
 		PreparedStatement pstmt;
 		int count = 0;
@@ -100,7 +106,9 @@ public class TodoList {
 			pstmt.setString(3, t.getCategory());
 			pstmt.setString(4, t.getCurrent_date());
 			pstmt.setString(5, t.getDue_date());
-			pstmt.setInt(6, t.getId());
+			pstmt.setString(6, t.getWith_who());
+			pstmt.setInt(7, t.getPriority());
+			pstmt.setInt(8, t.getId());
 			count = pstmt.executeUpdate(); //해당 statement에 영향을 받은 record의 수가 return됨 
 			pstmt.close();
 		} catch (Exception e) {
@@ -139,7 +147,9 @@ public class TodoList {
 				String due_date = rs.getString("due_date");
 				String current_date = rs.getString("current_date");
 				int is_completed = rs.getInt("is_completed");
-				TodoItem t = new TodoItem(title, description, current_date, category, due_date, is_completed);
+				String with_who = rs.getString("with_who");
+				int priority = rs.getInt("priority");
+				TodoItem t = new TodoItem(title, description, current_date, category, due_date, with_who, priority, is_completed);
 				t.setId(id);
 				list.add(t);
 			}
@@ -168,7 +178,9 @@ public class TodoList {
 				String due_date = rSet.getString("due_date");
 				String current_date = rSet.getString("current_date");
 				int is_completed = rSet.getInt("is_completed");
-				TodoItem t = new TodoItem(title, description, current_date, category, due_date, is_completed);
+				String with_who = rSet.getString("with_who");
+				int priority = rSet.getInt("priority");
+				TodoItem t = new TodoItem(title, description, current_date, category, due_date, with_who, priority, is_completed);
 				t.setId(id);
 				list.add(t);
 			}
@@ -195,7 +207,9 @@ public class TodoList {
 				String due_date = rSet.getString("due_date");
 				String current_date = rSet.getString("current_date");
 				int is_completed = rSet.getInt("is_completed");
-				TodoItem t = new TodoItem(title, description, current_date, category, due_date, is_completed);
+				String with_who = rSet.getString("with_who");
+				int priority = rSet.getInt("priority");
+				TodoItem t = new TodoItem(title, description, current_date, category, due_date, with_who, priority, is_completed);
 				t.setId(id);
 				list.add(t);
 			}
@@ -255,7 +269,9 @@ public class TodoList {
 				String due_date = rSet.getString("due_date");
 				String current_date = rSet.getString("current_date");
 				int is_completed = rSet.getInt("is_completed");
-				TodoItem t = new TodoItem(title, description, current_date, category, due_date, is_completed);
+				String with_who = rSet.getString("with_who");
+				int priority = rSet.getInt("priority");
+				TodoItem t = new TodoItem(title, description, current_date, category, due_date, with_who, priority, is_completed);
 				t.setId(id);
 				list.add(t);
 			}
@@ -283,7 +299,9 @@ public class TodoList {
 				String due_date = rSet.getString("due_date");
 				String current_date = rSet.getString("current_date");
 				int is_completed = rSet.getInt("is_completed");
-				TodoItem t = new TodoItem(title, description, current_date, category, due_date, is_completed);
+				String with_who = rSet.getString("with_who");
+				int priority = rSet.getInt("priority");
+				TodoItem t = new TodoItem(title, description, current_date, category, due_date, with_who, priority, is_completed);
 				t.setId(id);
 				list.add(t);
 			}
@@ -293,6 +311,8 @@ public class TodoList {
 		}
 		return list;
 	}
+	
+
 
 	public void sortByName() {
 		Collections.sort(list, new TodoSortByName());
@@ -329,5 +349,28 @@ public class TodoList {
 			e.printStackTrace();
 		}
 		return false;
+	}
+	
+	public void exportJson(int file_type) {
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		String jsonstr = gson.toJson(getList());
+//		System.out.println(jsonstr);
+		try {
+			if(file_type == 1) {
+				FileWriter writer = new FileWriter("todolistmid.json");
+				writer.write(jsonstr);
+				writer.close();
+				System.out.println("json 파일에 저장되었습니다!");
+			}
+			else {
+				FileWriter writer = new FileWriter("todolistmid.txt");
+				writer.write(jsonstr);
+				writer.close();
+				System.out.println("txt 파일에 저장되었습니다!");
+			}
+		} catch (IOException e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
 	}
 }

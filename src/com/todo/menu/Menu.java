@@ -16,6 +16,7 @@ public class Menu {
         System.out.println("find_cate <키워드> - 카테고리가 해당 키워드를 포함하고 있는 일정 검색");
         System.out.println("comp <id> - id번의 일정을 완료 표시");
         System.out.println("ls_comp - 완료한 일정 검색");
+        System.out.println("expert - json 포맷으로 db 내보내기 (.json / .txt)");
         System.out.println("exit - 종료");
     }
     

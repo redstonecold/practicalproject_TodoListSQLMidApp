@@ -11,12 +11,12 @@ public class TodoItem {
     private String category;
     private String due_date;
     private int is_completed;
-    private String with_who;
+	private String with_who;
     private int priority;
     
 
 
-    public TodoItem(String title, String desc, String category, String due_date){
+    public TodoItem(String title, String desc, String category, String due_date, String with_who, int priority){
         this.title=title;
         this.desc=desc;
         Date from = new Date();
@@ -25,21 +25,33 @@ public class TodoItem {
         this.current_date = to;
         this.category = category;
         this.due_date = due_date;
+        this.with_who = with_who;
+        this.priority = priority;
     }
     
-    public TodoItem(String title, String desc, String current_date, String category, String due_date, int is_completed){
+    public TodoItem(String title, String desc, String current_date, String category, String due_date, String with_who, int priority, int is_completed){
         this.title=title;
         this.desc=desc;
         this.current_date = current_date;
         this.category = category;
         this.due_date = due_date;
+        this.with_who = with_who;
+        this.priority = priority;
         this.is_completed = is_completed;
     }
     
     public String toString() {
-    	if (is_completed == 0)
-    		return "[" + category + "] " + id + ". <"+ title + "> " + desc + " (마감 : " + due_date + ") - " + current_date;
-    	return "[" + category + "] " + id + ". <"+ title + "> [V] " + desc + " (마감 : " + due_date + ") - " + current_date;
+    	String reString = "";
+    	
+    	if(priority == 1) reString += "[긴급] ";
+    	else if(priority == 2) reString += "[보통] ";
+    	else reString += "[여유] ";
+    	reString += "<"+category+ "> "+id + ". "+title;
+    	if(is_completed == 1) reString += "[V]";
+    	reString += " : "+desc+" (마감 : "+due_date+") - "+current_date;
+    	if(!with_who.equals("나")) reString += " 참석자 : "+with_who;
+    	
+    	return reString;
     }
     
     public int getId() {
@@ -98,6 +110,21 @@ public class TodoItem {
 		this.is_completed = is_completed;
 	}
 	
+	public String getWith_who() {
+		return with_who;
+	}
+
+	public void setWith_who(String with_who) {
+		this.with_who = with_who;
+	}
+
+	public int getPriority() {
+		return priority;
+	}
+
+	public void setPriority(int priority) {
+		this.priority = priority;
+	}
 	
 //  public String toSaveString() {
 //	return category + "##" +title + "##" + desc + "##" + due_date + "##" + current_date + "##" +"\n";

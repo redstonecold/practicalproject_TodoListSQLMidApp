@@ -4,6 +4,7 @@ import java.util.Scanner;
 
 import com.todo.dao.TodoList;
 import com.todo.menu.Menu;
+import com.todo.service.DbConnect;
 import com.todo.service.TodoUtil;
 
 public class TodoMain {
@@ -87,8 +88,14 @@ public class TodoMain {
 				case "ls_comp" :
 					TodoUtil.listAll(l,1);
 					break;
+				
+				case "expert" :
+					TodoUtil.exportJson(l);
+					break;
+					
 					
 				case "exit":
+					DbConnect.closeConnection();
 					quit = true;
 					break;
 
