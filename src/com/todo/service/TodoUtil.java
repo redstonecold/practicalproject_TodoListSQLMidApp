@@ -81,7 +81,7 @@ public class TodoUtil {
 					repeat_interval = Integer.parseInt(bf.readLine());
 				}
 				//반복이 계산된 item을 list에 넣기
-				System.out.println("[추가된 날짜]");
+//				System.out.println("[추가된 날짜]");
 				for(int i=0; i<repeat_times-1; i++) {
 					due_date = repeatDateString(due_date, repeat_times, repeat_interval);
 					t = new TodoItem(title, desc, category, due_date, with_who, priority);
