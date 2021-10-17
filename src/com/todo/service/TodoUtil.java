@@ -50,7 +50,7 @@ public class TodoUtil {
 				priority = Integer.parseInt(bf.readLine());
 			}
 			
-			System.out.println(due_date);
+//			System.out.println(due_date);
 			TodoItem t = new TodoItem(title, desc, category, due_date, with_who, priority);
 			tlist.add(t);
 			
@@ -81,7 +81,7 @@ public class TodoUtil {
 					repeat_interval = Integer.parseInt(bf.readLine());
 				}
 				//반복이 계산된 item을 list에 넣기
-//				System.out.println("[추가된 날짜]");
+				System.out.println("[추가된 날짜]");
 				for(int i=0; i<repeat_times-1; i++) {
 					due_date = repeatDateString(due_date, repeat_times, repeat_interval);
 					t = new TodoItem(title, desc, category, due_date, with_who, priority);
@@ -111,8 +111,8 @@ public class TodoUtil {
 			parsing_int[i] = Integer.parseInt(parsing[i]);
 		}
 		//반복 날짜 계산 
-		System.out.println(parsing_int[1]);
-		System.out.println(parsing_int[2]);
+//		System.out.println(parsing_int[1]);
+//		System.out.println(parsing_int[2]);
 		switch (parsing_int[1]) {
 			//1,3,5,7,8,10월 처리
 			case 1: case 3: case 5: case 7: case 8: case 10: {
@@ -167,7 +167,7 @@ public class TodoUtil {
 			due_date = Integer.toString(parsing_int[0])+"/"+Integer.toString(parsing_int[1])+"/0"+Integer.toString(parsing_int[2]);
 		else due_date = Integer.toString(parsing_int[0])+"/"+Integer.toString(parsing_int[1])+"/"+Integer.toString(parsing_int[2]);
 		
-		System.out.println(due_date);
+//		System.out.println(due_date);
 		return due_date;
 	}
 
