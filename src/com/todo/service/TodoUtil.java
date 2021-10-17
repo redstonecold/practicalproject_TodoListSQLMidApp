@@ -1,17 +1,9 @@
 package com.todo.service;
 
-import java.awt.desktop.PrintFilesEvent;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
-
-import com.google.gson.Gson;
 import com.todo.dao.TodoItem;
 import com.todo.dao.TodoList;
 
@@ -27,29 +19,29 @@ public class TodoUtil {
 		BufferedReader bf = new BufferedReader(new InputStreamReader(System.in)); //선언
 
 		System.out.println("------일정 추가------");
-		
 		try {
+			//제목 묻기
 			System.out.print("[제목] ");
 			title = bf.readLine();
 			if (list.isDuplicate(title)) {
 				System.out.printf("제목은 중복될 수 없습니다 ㅠ\n");
 				return;
 			}
-
+			//설명 묻기 
 			System.out.print("[설명] ");
 			desc = bf.readLine();
-			
+			//카테고리 묻기 
 			System.out.print("[카테고리] ");
 			category = bf.readLine();
-			
+			//마감일자 묻기
 			System.out.print("[마감 일자] (YYYY/MM/DD) ");
 			due_date = bf.readLine();
-		
+			//참석자 묻기 
 			System.out.print("[참석자] (참석자 없을 시 enter) ");
 			with_who = bf.readLine();
 			if(with_who.equals("") || with_who.equals(" ")) with_who = "나";
 //			System.out.println("with_who : "+with_who);
-			
+			//우선순위 묻기 
 			System.out.print("[우선순위] (긴급 : 1, 보통 : 2, 여유 : 3) ");
 			priority = Integer.parseInt(bf.readLine());
 			while(priority < 1 || priority > 3) {
@@ -58,6 +50,11 @@ public class TodoUtil {
 				priority = Integer.parseInt(bf.readLine());
 			}
 			
+			System.out.println(due_date);
+			TodoItem t = new TodoItem(title, desc, category, due_date, with_who, priority);
+			tlist.add(t);
+			
+			//반복 여부 묻기 
 			System.out.print("반복 일정 (Y/N) ");
 			repeat = bf.readLine();
 			while (!repeat.equals("Y") && !repeat.equals("y") && !repeat.equals("N") && !repeat.equals("n")) {
@@ -67,6 +64,7 @@ public class TodoUtil {
 			}
 			
 			if(repeat.equals("Y") || repeat.equals("y")) {
+				//반복 회수 묻기 
 				System.out.print("반복 횟수 : ");
 				repeat_times = Integer.parseInt(bf.readLine());
 				while (repeat_times < 1) {
@@ -74,6 +72,7 @@ public class TodoUtil {
 					System.out.print("반복 횟수 : ");
 					repeat_times = Integer.parseInt(bf.readLine());
 				}
+				//반복 주기 묻기 
 				System.out.print("반복 주기 : ");
 				repeat_interval = Integer.parseInt(bf.readLine());
 				while (repeat_interval < 1) {
@@ -81,73 +80,13 @@ public class TodoUtil {
 					System.out.print("반복 주기 : ");
 					repeat_interval = Integer.parseInt(bf.readLine());
 				}
-				
-				String[] parsing = due_date.split("/",3);
-				int[] parsing_int = new int[3];
-				for(int i=0; i<3; i++) {
-					parsing_int[i] = Integer.parseInt(parsing[i]);
-				}
-				
-				System.out.println("[추가된 날짜]");
-				for(int i=0; i<repeat_times; i++) {
-					System.out.println(parsing_int[1]);
-					System.out.println(parsing_int[2]);
-					switch (parsing_int[1]) {
-						case 1: case 3: case 5: case 7: case 8: case 10: {
-							if(parsing_int[2]+repeat_interval > 31) {
-								parsing_int[1] += 1;
-								parsing_int[2] = parsing_int[2]+repeat_interval - 31;
-							}
-							else parsing_int[2] = parsing_int[2]+repeat_interval;
-							break;
-						}
-						case 4: case 6: case 9: case 11: {
-							if(parsing_int[2]+repeat_interval > 30) {
-								parsing_int[1] += 1;
-								parsing_int[2] = parsing_int[2]+repeat_interval - 30;
-							}
-							else parsing_int[2] = parsing_int[2]+repeat_interval;
-							break;
-						}
-						case 12 : {
-							if(parsing_int[2]+repeat_interval > 31) {
-								parsing_int[0] += 1;
-								parsing_int[1] = 1;
-								parsing_int[2] = parsing_int[2]+repeat_interval - 31;
-							}
-							else parsing_int[2] = parsing_int[2]+repeat_interval;
-							break;
-						}
-						default: {
-							int feb_days;
-							if(parsing_int[0]%400 == 0) feb_days = 29;
-							else if(parsing_int[0]%100 == 0) feb_days = 28;
-							else if(parsing_int[0]%4 == 0) feb_days = 29;
-							else feb_days = 28;
-							
-							if(parsing_int[2]+repeat_interval > feb_days) {
-								parsing_int[1] += 1;
-								parsing_int[2] = parsing_int[2]+repeat_interval - feb_days;
-							}
-							else parsing_int[2] = parsing_int[2]+repeat_interval;
-							break;
-						}
-					}
-					if(parsing_int[1] < 10 && parsing_int[2] < 10) 
-						due_date = Integer.toString(parsing_int[0])+"/0"+Integer.toString(parsing_int[1])+"/0"+Integer.toString(parsing_int[2]);
-					else if(parsing_int[1] < 10) 
-						due_date = Integer.toString(parsing_int[0])+"/0"+Integer.toString(parsing_int[1])+"/"+Integer.toString(parsing_int[2]);
-					else if(parsing_int[2] < 10) 
-						due_date = Integer.toString(parsing_int[0])+"/"+Integer.toString(parsing_int[1])+"/0"+Integer.toString(parsing_int[2]);
-					
-					System.out.println(due_date);
-					TodoItem t = new TodoItem(title, desc, category, due_date, with_who, priority);
+				//반복이 계산된 item을 list에 넣기
+//				System.out.println("[추가된 날짜]");
+				for(int i=0; i<repeat_times-1; i++) {
+					due_date = repeatDateString(due_date, repeat_times, repeat_interval);
+					t = new TodoItem(title, desc, category, due_date, with_who, priority);
 					tlist.add(t);
 				}
-			}
-			else {
-				TodoItem t = new TodoItem(title, desc, category, due_date, with_who, priority);
-				tlist.add(t);
 			}
 			
 			for(TodoItem tItem : tlist) {
@@ -158,22 +97,88 @@ public class TodoUtil {
 			
 			if(is_add) System.out.println("\" <"+title+"> "+desc+" \"이(가) 저장되었습니다 :)");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+			
 		
+	}
+	
+	public static String repeatDateString (String due_date, int repeat_times, int repeat_interval) {	
+		//String 문자열 년,월,일로 파싱
+		String[] parsing = due_date.split("/",3);
+		int[] parsing_int = new int[3];
+		for(int i=0; i<3; i++) {
+			parsing_int[i] = Integer.parseInt(parsing[i]);
+		}
+		//반복 날짜 계산 
+		System.out.println(parsing_int[1]);
+		System.out.println(parsing_int[2]);
+		switch (parsing_int[1]) {
+			//1,3,5,7,8,10월 처리
+			case 1: case 3: case 5: case 7: case 8: case 10: {
+				if(parsing_int[2]+repeat_interval > 31) {
+					parsing_int[1] += 1;
+					parsing_int[2] = parsing_int[2]+repeat_interval - 31;
+				}
+				else parsing_int[2] = parsing_int[2]+repeat_interval;
+				break;
+			}
+			//4,6,9,11월 처리
+			case 4: case 6: case 9: case 11: {
+				if(parsing_int[2]+repeat_interval > 30) {
+					parsing_int[1] += 1;
+					parsing_int[2] = parsing_int[2]+repeat_interval - 30;
+				}
+				else parsing_int[2] = parsing_int[2]+repeat_interval;
+				break;
+			}
+			//12월 처리 
+			case 12 : {
+				if(parsing_int[2]+repeat_interval > 31) {
+					parsing_int[0] += 1;
+					parsing_int[1] = 1;
+					parsing_int[2] = parsing_int[2]+repeat_interval - 31;
+				}
+				else parsing_int[2] = parsing_int[2]+repeat_interval;
+				break;
+			}
+			//2월 처리 
+			default: {
+				int feb_days;
+				if(parsing_int[0]%400 == 0) feb_days = 29;
+				else if(parsing_int[0]%100 == 0) feb_days = 28;
+				else if(parsing_int[0]%4 == 0) feb_days = 29;
+				else feb_days = 28;
+				
+				if(parsing_int[2]+repeat_interval > feb_days) {
+					parsing_int[1] += 1;
+					parsing_int[2] = parsing_int[2]+repeat_interval - feb_days;
+				}
+				else parsing_int[2] = parsing_int[2]+repeat_interval;
+				break;
+			}
+		}
+		//숫자가 1의 자리수 일 때 포맷 맞추기
+		if(parsing_int[1] < 10 && parsing_int[2] < 10) 
+			due_date = Integer.toString(parsing_int[0])+"/0"+Integer.toString(parsing_int[1])+"/0"+Integer.toString(parsing_int[2]);
+		else if(parsing_int[1] < 10) 
+			due_date = Integer.toString(parsing_int[0])+"/0"+Integer.toString(parsing_int[1])+"/"+Integer.toString(parsing_int[2]);
+		else if(parsing_int[2] < 10) 
+			due_date = Integer.toString(parsing_int[0])+"/"+Integer.toString(parsing_int[1])+"/0"+Integer.toString(parsing_int[2]);
+		else due_date = Integer.toString(parsing_int[0])+"/"+Integer.toString(parsing_int[1])+"/"+Integer.toString(parsing_int[2]);
+		
+		System.out.println(due_date);
+		return due_date;
 	}
 
 	public static void deleteItem(TodoList l) {
 
 		BufferedReader bf = new BufferedReader(new InputStreamReader(System.in)); //선언
-		Scanner sc = new Scanner(System.in); // Scanner 객체 생성
 		
 		System.out.println("------일정 삭제------");
 
 		int del_num;
 		try {
-			List<TodoItem> list = l.getList();
 			System.out.println("삭제할 일정의 번호를 입력하세요");
 			System.out.print("[번호] ");
 			del_num = Integer.parseInt(bf.readLine());
@@ -190,9 +195,7 @@ public class TodoUtil {
 		BufferedReader bf = new BufferedReader(new InputStreamReader(System.in)); //선언
 
 		System.out.println("------일정 수정------");
-		String title;
 		try {
-			List<TodoItem> list = l.getList();
 			System.out.println("수정할 일정의 번호를 입력하세요");
 			System.out.print("[번호] ");
 			int edit_num = Integer.parseInt(bf.readLine());
@@ -242,7 +245,6 @@ public class TodoUtil {
 	}
 
 	public static void listAll(TodoList l) {
-		int count = 0;
 		System.out.println("------전체 목록------");
 		System.out.println("[총 "+l.getCount()+"개의 일정]");
 		for (TodoItem item : l.getList()) {
